@@ -1,17 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using UsersProducts.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Identity;
+using Shared.Models;
 
 namespace UsersProducts
 {
@@ -31,11 +25,13 @@ namespace UsersProducts
             string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<db_UsersProductContext>(options => options.UseSqlServer(Configuration.GetConnectionString("MyConnection")));
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-        .AddCookie(options =>
-        {
-            options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
-            options.AccessDeniedPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
-        });
+                    .AddCookie(options =>
+                    {
+                        options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
+                        options.AccessDeniedPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
+                    });
+
+         
             //services.AddIdentity<TblUsers, TblUserRoles>(opt =>
             //{
             //    opt.User.RequireUniqueEmail = true;
@@ -63,7 +59,7 @@ namespace UsersProducts
             app.UseStaticFiles();
 
             app.UseRouting();
-            app.UseAuthentication();  
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

@@ -1,21 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
-using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.EntityFrameworkCore;
-using UsersProducts.Models;
+using Newtonsoft.Json;
+using Shared.Models;
 
 namespace UsersProducts.Controllers
 {
     public class ProductController : Controller
     {
         private readonly db_UsersProductContext _dbContext;
-       
+        private readonly string API_URL = "http://localhost:5003";
         public ProductController(db_UsersProductContext _dbContext)
         {
             this._dbContext = _dbContext;
@@ -23,23 +22,30 @@ namespace UsersProducts.Controllers
 
 
         [Authorize(Roles = "Viewer, Admin, Approver")]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            List<ProductCategoryViewModel> productCategoryViewModel = null;
 
-            var products = _dbContext.Tbl_Products.Include(pr => pr.ProductCategory)
-                .Select(pr => new ProductCategoryViewModel
+            using (var httpClient = new HttpClient())
+            {
+                //httpClient.BaseAddress = new Uri(API_URL);
+                httpClient.DefaultRequestHeaders.Accept.Clear();
+                using (HttpResponseMessage response = await httpClient.GetAsync($"{API_URL}/api/Product/all"))
                 {
-                    ProductId = pr.ProductId,
-                    ProductName = pr.ProductName,
-                    ProductImage = pr.ProductImage,
-                    ProCatId = pr.ProCatId,
-                    ProductPrice = pr.ProductPrice,
-                    CategoryName = pr.ProductCategory.CategoryName
-                });
+                    if (response.IsSuccessStatusCode)
+                    {
 
+                        var result = await response.Content.ReadAsStringAsync();
+                        productCategoryViewModel = JsonConvert.DeserializeObject<List<ProductCategoryViewModel>>(result);
 
-            return View(products);
+                    }
+                }
+            }
+
+            return View(productCategoryViewModel);
         }
+
+        //using (HttpResponseMessage response = await httpClient.PostAsync(API_URL, new StringContent(jsonModel, Encoding.UTF8, "application/json"))
 
 
         [Authorize(Roles = "Admin")]
@@ -56,46 +62,46 @@ namespace UsersProducts.Controllers
             }
             ViewBag.Category = a;
             return View();
-           
+
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Create(TblProducts nec, IFormFile file)
         {
-           
-                string filename = System.Guid.NewGuid().ToString() + ".jpg";
-                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", filename);
 
-                using (var stream = new FileStream(path, FileMode.Create))
-                {
-                    await file.CopyToAsync(stream);
-                }
-                nec.ProductImage = filename;
+            string filename = System.Guid.NewGuid().ToString() + ".jpg";
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", filename);
 
-               
-                if (ModelState.IsValid)
-                {
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+            nec.ProductImage = filename;
 
-                    _dbContext.Add(nec);
-                    await _dbContext.SaveChangesAsync();
-                    return RedirectToAction("Index");
 
-                }
-                return View(nec);   
-            
+            if (ModelState.IsValid)
+            {
+
+                _dbContext.Add(nec);
+                await _dbContext.SaveChangesAsync();
+                return RedirectToAction("Index");
+
+            }
+            return View(nec);
+
         }
 
 
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id)
         {
-           
-                if (id == 0)
-                {
-                    return RedirectToAction("Index");
-                }
-                var getusersdetail = await _dbContext.Tbl_Products.FindAsync(id);
+
+            if (id == 0)
+            {
+                return RedirectToAction("Index");
+            }
+            var getusersdetail = await _dbContext.Tbl_Products.FindAsync(id);
             var a = new List<TblProductCategory>();
             foreach (var item in _dbContext.Tbl_ProductCategory)
             {
@@ -107,7 +113,7 @@ namespace UsersProducts.Controllers
             }
             ViewBag.Category = a;
             return View(getusersdetail);
-              
+
         }
 
 
@@ -116,50 +122,50 @@ namespace UsersProducts.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(TblProducts inputProduct, IFormFile file)
         {
-          
-                string filename = System.Guid.NewGuid().ToString() + ".jpg";
-                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", filename);
 
-                using (var stream = new FileStream(path, FileMode.Create))
-                {
-                    await file.CopyToAsync(stream);
-                }
+            string filename = System.Guid.NewGuid().ToString() + ".jpg";
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", filename);
 
-                inputProduct.ProductImage = filename;
+            using (var stream = new FileStream(path, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
 
-                if (ModelState.IsValid)
-                {
-                    _dbContext.Update(inputProduct);
-                    await _dbContext.SaveChangesAsync();
-                    return RedirectToAction("Index");
+            inputProduct.ProductImage = filename;
 
-                }
-                return View(inputProduct);
+            if (ModelState.IsValid)
+            {
+                _dbContext.Update(inputProduct);
+                await _dbContext.SaveChangesAsync();
+                return RedirectToAction("Index");
+
+            }
+            return View(inputProduct);
         }
 
 
-         [Authorize(Roles = "Admin, Approver")]
+        [Authorize(Roles = "Admin, Approver")]
         public async Task<IActionResult> Details(int? id)
         {
-                if (id == null)
-                {
-                    return RedirectToAction("Index");
-                }
-                var getusersdetail = await _dbContext.Tbl_Products.FindAsync(id);
-                return View(getusersdetail);           
+            if (id == null)
+            {
+                return RedirectToAction("Index");
+            }
+            var getusersdetail = await _dbContext.Tbl_Products.FindAsync(id);
+            return View(getusersdetail);
         }
 
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
-         
-                if (id == null)
-                {
-                    return RedirectToAction("Index");
-                }
-                var getusersdetail = await _dbContext.Tbl_Products.FindAsync(id);
-                return View(getusersdetail);
-            
+
+            if (id == null)
+            {
+                return RedirectToAction("Index");
+            }
+            var getusersdetail = await _dbContext.Tbl_Products.FindAsync(id);
+            return View(getusersdetail);
+
         }
 
 
@@ -167,11 +173,11 @@ namespace UsersProducts.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
-                var getusersdelete = await _dbContext.Tbl_Products.FindAsync(id);
-                _dbContext.Tbl_Products.Remove(getusersdelete);
-                await _dbContext.SaveChangesAsync();
-                return RedirectToAction("Index");
-         
+            var getusersdelete = await _dbContext.Tbl_Products.FindAsync(id);
+            _dbContext.Tbl_Products.Remove(getusersdelete);
+            await _dbContext.SaveChangesAsync();
+            return RedirectToAction("Index");
+
         }
 
     }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace UsersProducts.Models
+namespace Shared.Models
 {
     public partial class TblProductCategory
     {

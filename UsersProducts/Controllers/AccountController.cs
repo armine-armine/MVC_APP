@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
@@ -8,8 +6,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using UsersProducts.Models;
-using UsersProducts.ViewModels;
+using Shared.Models;
 
 namespace UsersProducts.Controllers
 {
@@ -21,6 +18,7 @@ namespace UsersProducts.Controllers
         {
             db = context;
         }
+
         [HttpGet]
         public IActionResult Login()
         {
@@ -43,33 +41,7 @@ namespace UsersProducts.Controllers
             }
             return View(model);
         }
-        //[HttpGet]
-        //public IActionResult Register()
-        //{
-        //    return View();
-        //}
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Register(RegisterModel model)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        TblUsers user = await db.Tbl_Users.FirstOrDefaultAsync(u => u.Email == model.Email);
-        //        if (user == null)
-        //        {
-        //            // добавляем пользователя в бд
-        //            db.Tbl_Users.Add(new  { Email = model.Email, Password = model.Password });
-        //            await db.SaveChangesAsync();
-
-        //            await Authenticate(model.Email); // аутентификация
-
-        //            return RedirectToAction("Index", "Home");
-        //        }
-        //        else
-        //            ModelState.AddModelError("", "Некорректные логин и(или) пароль");
-        //    }
-        //    return View(model);
-        //}
+       
 
         private async Task Authenticate(TblUsers user)
         {

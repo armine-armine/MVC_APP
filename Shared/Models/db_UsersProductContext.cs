@@ -1,9 +1,8 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
-using UsersProducts.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using Shared.Models;
 
-namespace UsersProducts.Models
+
+namespace Shared.Models
 {
     public partial class db_UsersProductContext : DbContext
     {
@@ -20,6 +19,7 @@ namespace UsersProducts.Models
         public virtual DbSet<TblProducts> Tbl_Products { get; set; } 
         public virtual DbSet<TblUserRoles> Tbl_UserRoles { get; set; }
         public virtual DbSet<TblUsers> Tbl_Users { get; set; }
+        public DbSet<ProductCategoryViewModel> ProductCategoryViewModel { get; set; }
 
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         //{
@@ -126,6 +126,6 @@ namespace UsersProducts.Models
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 
-        public DbSet<UsersProducts.Models.ProductCategoryViewModel> ProductCategoryViewModel { get; set; }
+
     }
 }

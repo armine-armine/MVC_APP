@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace UsersProducts.Models
+namespace Shared.Models
 {
-    public partial class TblUsers
+    public  class TblUsers
     {
         public int Id { get; set; }
         public string Name { get; set; }

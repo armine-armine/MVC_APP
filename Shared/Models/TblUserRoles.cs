@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace UsersProducts.Models
+namespace Shared.Models
 {
     public partial class TblUserRoles
     {
