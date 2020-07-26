@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Diagnostics;
 using Newtonsoft.Json;
 using Shared.Models;
 
@@ -30,7 +33,7 @@ namespace UsersProducts.Controllers
             {
                 //httpClient.BaseAddress = new Uri(API_URL);
                 httpClient.DefaultRequestHeaders.Accept.Clear();
-                using (HttpResponseMessage response = await httpClient.GetAsync($"{API_URL}/api/Product/all"))
+                using (HttpResponseMessage response = await httpClient.GetAsync($"{API_URL}/api/Product/allProducts"))
                 {
                     if (response.IsSuccessStatusCode)
                     {
@@ -49,27 +52,35 @@ namespace UsersProducts.Controllers
 
 
         [Authorize(Roles = "Admin")]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            var a = new List<TblProductCategory>();
-            foreach (var item in _dbContext.Tbl_ProductCategory)
+            List<TblProductCategory> tblProductCategories = null;
+
+            using (var httpClient = new HttpClient())
             {
-                a.Add(new TblProductCategory()
+                httpClient.DefaultRequestHeaders.Accept.Clear();
+                using (HttpResponseMessage response = await httpClient.GetAsync($"{API_URL}/api/Product/allproductCategories"))
                 {
-                    CategoryName = item.CategoryName,
-                    CategoryId = item.CategoryId
-                });
+                    if (response.IsSuccessStatusCode)
+                    {
+
+                        var result = await response.Content.ReadAsStringAsync();
+                        tblProductCategories = JsonConvert.DeserializeObject<List<TblProductCategory>>(result);
+
+                    }
+                }
             }
-            ViewBag.Category = a;
+
+
+            ViewBag.Category = tblProductCategories;
             return View();
 
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<IActionResult> Create(TblProducts nec, IFormFile file)
+        public async Task<IActionResult> Create(TblProducts product, IFormFile file)
         {
-
             string filename = System.Guid.NewGuid().ToString() + ".jpg";
             var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", filename);
 
@@ -77,18 +88,22 @@ namespace UsersProducts.Controllers
             {
                 await file.CopyToAsync(stream);
             }
-            nec.ProductImage = filename;
+            product.ProductImage = filename;
 
-
-            if (ModelState.IsValid)
+            using (var httpClient = new HttpClient())
             {
+                httpClient.DefaultRequestHeaders.Accept.Clear();
+                var productJson = JsonConvert.SerializeObject(product);
+                using (HttpResponseMessage response = await httpClient.PostAsync($"{API_URL}/api/Product/create", new StringContent(productJson, Encoding.UTF8, "application/json")))
+                {
 
-                _dbContext.Add(nec);
-                await _dbContext.SaveChangesAsync();
-                return RedirectToAction("Index");
+                    if (response.IsSuccessStatusCode)
+                        return RedirectToAction("Index");
+                    else
+                        return View(product);
 
+                }
             }
-            return View(nec);
 
         }
 

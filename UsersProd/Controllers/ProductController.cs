@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shared.Models;
@@ -62,32 +65,20 @@ namespace UsersProd.Controllers
             return Ok(productCategories);
         }
 
-        //[HttpPost("create")]
-        //[Authorize(Roles = "Admin")]
-        //public async Task<IActionResult> Create(TblProducts nec, IFormFile file)
-        //{
+        [HttpPost("create")]
+        public async Task<IActionResult> Create(TblProducts products)
+        {
 
-        //    string filename = System.Guid.NewGuid().ToString() + ".jpg";
-        //    var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", filename);
+            if (ModelState.IsValid)
+            {
+                _dbContext.Add(products);
+                await _dbContext.SaveChangesAsync();
+                return Ok();
+            }
+            else
+                return BadRequest();
 
-        //    using (var stream = new FileStream(path, FileMode.Create))
-        //    {
-        //        await file.CopyToAsync(stream);
-        //    }
-        //    nec.ProductImage = filename;
-
-
-        //    if (ModelState.IsValid)
-        //    {
-
-        //        _dbContext.Add(nec);
-        //        await _dbContext.SaveChangesAsync();
-        //        return RedirectToAction("Index");
-
-        //    }
-        //    return Ok(nec);
-
-        //}
+        }
 
         //[Authorize(Roles = "Admin")]
         //public async Task<IActionResult> Edit(int id)
