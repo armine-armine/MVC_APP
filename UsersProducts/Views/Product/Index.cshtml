@@ -1,0 +1,84 @@
+﻿@model IEnumerable<UsersProducts.Models.ProductCategoryViewModel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+@*<p>
+        <a asp-action="Create">Create New</a>
+    </p>*@
+@if (User.IsInRole("Admin"))
+{<p>
+        <a asp-action="Create">Create New</a>
+    </p>
+}
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ProductId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ProductName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ProductPrice)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ProductImage)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ProCatId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CategoryName)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProductId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProductName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProductPrice)
+                </td>
+                @*<td>
+                        @Html.DisplayFor(modelItem => item.ProductImage)
+                    </td>*@
+                <td> <img src="~/images/@item.ProductImage" style="height:70px; width:70px" /></td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProCatId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CategoryName)
+                </td>
+                
+                    @{ if (User.IsInRole("Approver"))
+                       {
+                        <td>
+                             @Html.ActionLink("Details", "Details", new { id = item.ProductId }, new { @class = " btn btn-success" })
+                        </td>
+
+                       }
+
+                        else if (User.IsInRole("Admin"))
+                        { <td>
+                            @Html.ActionLink("Edit", "Edit", new { id = item.ProductId }, new { @class = " btn btn-primary " }) |
+                            @Html.ActionLink("Details", "Details", new { id = item.ProductId }, new { @class = " btn btn-success" }) |
+                            @Html.ActionLink("Delete", "Delete", new { id = item.ProductId }, new { @class = " btn btn-danger" })
+                          </td>
+                        }
+                    }
+            </tr>
+         }
+    </tbody>
+</table>

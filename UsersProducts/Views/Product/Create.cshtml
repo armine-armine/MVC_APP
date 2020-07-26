@@ -1,0 +1,50 @@
+﻿@model UsersProducts.Models.TblProducts
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>TblProducts</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="ProductName" class="control-label"></label>
+                <input asp-for="ProductName" class="form-control" />
+                <span asp-validation-for="ProductName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProductPrice" class="control-label"></label>
+                <input asp-for="ProductPrice" class="form-control" />
+                <span asp-validation-for="ProductPrice" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProductImage" class="control-label"></label>
+                <input type="file" name="file" @*asp-for="ProductImage" class="form-control"*@ />
+                <span asp-validation-for="ProductImage" class="text-danger"></span>
+            </div>
+            <br />
+            <div class="form-group">
+                <select asp-for="ProCatId"
+                        asp-items="@(new SelectList(ViewBag.Category,"CategoryId","CategoryName"))">
+                    <option>Please select one</option>
+                </select>
+
+            </div>
+            <br />
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+            @*@Html.DropDownListFor(model=>model.ProductCategory,new SelectList(new db_UsersProductContext().Tbl_ProductCategory.ToList(), "CategoryId", "CategoryName"))*@
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
