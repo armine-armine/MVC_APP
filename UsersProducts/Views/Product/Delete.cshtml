@@ -10,35 +10,37 @@
 <div>
     <h4>TblProducts</h4>
     <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ProductName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductPrice)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ProductPrice)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductImage)
-        </dt>
-        <dd class="col-sm-10">
-            <img src="~/images/@Model.ProductImage" style="height:70px; width:70px" />
-            @*@Html.DisplayFor(model => model.ProductImage)*@
-        </dd>
-        @*<dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ProductCategory)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ProductCategory.CategoryName)
-        </dd class>*@
-    </dl>
-    
-    <form asp-action="Delete">
+    <div class="row">
+        <div class="col-sm-2">
+            <label for="cat">Category Name</label>
+        </div>
+        <div class="col-sm-10">
+            <h4 id="cat">@Model.ProductCategory.CategoryName</h4>
+        </div>
+
+        <div class="col-sm-2">
+            <label for="prod">Product Name</label>
+        </div>
+        <div class="col-sm-10">
+            <h4 id="prod">@Model.ProductName</h4>
+        </div>
+
+        <div class="col-sm-2">
+            <label for="price">Product Price</label>
+        </div>
+        <div class="col-sm-10">
+            <h4 id="price">@Model.ProductPrice</h4>
+        </div>
+
+
+        <div class="col-sm-12" style="text-align: center;margin-top: 36px;">
+        
+            <img src="~/images/@Model.ProductImage" style="height:300px;" />
+        </div>
+      
+       
+    </div>
+    <form asp-action="Delete" asp-route-id="@Model.ProductId">
         <input type="hidden" asp-for="ProductId" />
         <input type="submit" value="Delete" class="btn btn-danger" /> |
         <a asp-action="Index">Back to List</a>

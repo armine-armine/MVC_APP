@@ -1,4 +1,4 @@
-﻿@model TblProducts
+﻿@model ProductEditViewModel
 
 @{
     ViewData["Title"] = "Create";
@@ -13,24 +13,24 @@
         <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="ProductName" class="control-label"></label>
-                <input asp-for="ProductName" class="form-control" />
-                <span asp-validation-for="ProductName" class="text-danger"></span>
+                <label asp-for="@Model.Product.ProductName" class="control-label"></label>
+                <input asp-for="@Model.Product.ProductName" class="form-control" />
+                <span asp-validation-for="@Model.Product.ProductName" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="ProductPrice" class="control-label"></label>
-                <input asp-for="ProductPrice" class="form-control" />
-                <span asp-validation-for="ProductPrice" class="text-danger"></span>
+                <label asp-for="@Model.Product.ProductPrice" class="control-label"></label>
+                <input asp-for="@Model.Product.ProductPrice" class="form-control" />
+                <span asp-validation-for="@Model.Product.ProductPrice" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="ProductImage" class="control-label"></label>
+                <label asp-for="@Model.Product.ProductImage" class="control-label"></label>
                 <input type="file" name="file" @*asp-for="ProductImage" class="form-control"*@ />
-                <span asp-validation-for="ProductImage" class="text-danger"></span>
+                <span asp-validation-for="@Model.Product.ProductImage" class="text-danger"></span>
             </div>
             <br />
             <div class="form-group">
-                <select asp-for="ProCatId"
-                        asp-items="@(new SelectList(ViewBag.Category,"CategoryId","CategoryName"))">
+                <select asp-for="@Model.Product.ProCatId"
+                        asp-items="@(new SelectList(Model.Category,"CategoryId","CategoryName"))">
                     <option>Please select one</option>
                 </select>
 
