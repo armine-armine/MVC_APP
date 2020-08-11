@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Shared.Models
+namespace UsersProducts.ViewModel
 {
     public class LoginViewModel
     {
@@ -18,6 +18,5 @@ namespace Shared.Models
 
         //[Display(Name ="Remember Me")]
         //public bool RememeberMe { get; set; }
-
     }
 }

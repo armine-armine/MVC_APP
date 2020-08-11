@@ -1,3 +1,5 @@
+using LogicLayer.Interfaces;
+using LogicLayer.Repository;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -29,6 +31,8 @@ namespace UsersProd
                 //options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
                 //options.AccessDeniedPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
             });
+            services.AddScoped<IProduct, ProductRepository>();
+            services.AddScoped<ICategory, CategoryRepository>();
             services.AddControllersWithViews()
     .AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore

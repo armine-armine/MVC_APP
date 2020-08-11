@@ -6,7 +6,6 @@ namespace Shared.Models
 {
     public partial class TblProducts
     {
-        [Key]
         public int ProductId { get; set; }
         public string ProductName { get; set; }
         public int ProductPrice { get; set; }

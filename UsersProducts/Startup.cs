@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Shared.Models;
+using UsersProducts.Models;
 
 namespace UsersProducts
 {
@@ -18,7 +18,7 @@ namespace UsersProducts
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
@@ -31,7 +31,7 @@ namespace UsersProducts
                         options.AccessDeniedPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
                     });
 
-         
+
             //services.AddIdentity<TblUsers, TblUserRoles>(opt =>
             //{
             //    opt.User.RequireUniqueEmail = true;
@@ -62,8 +62,14 @@ namespace UsersProducts
             app.UseAuthentication();
             app.UseAuthorization();
 
+
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllerRoute(
+                 name: "products",
+                 pattern: "Product/{action}/{id?}",
+                 defaults: new { controller = "Home" });
+
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Product}/{action=Index}/{id?}");

@@ -2,12 +2,12 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using LogicLayer.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shared.Models;
-using Shared.ViewModels;
 
 namespace UsersProd.Controllers
 {
@@ -18,11 +18,15 @@ namespace UsersProd.Controllers
         #region Fields
         private readonly db_UsersProductContext _dbContext;
         #endregion Fields
+        private readonly IProduct _product;
+        private readonly ICategory _category;
 
         #region Constructor
-        public ProductController(db_UsersProductContext _dbContext)
+        public ProductController(db_UsersProductContext dbContext, IProduct product, ICategory category)
         {
-            this._dbContext = _dbContext;
+            _dbContext = dbContext;
+            _product = product;
+            _category = category;
         }
 
         #endregion Constructor
@@ -30,50 +34,36 @@ namespace UsersProd.Controllers
         #region Methods
 
 
-        [HttpGet, Route("allProducts")]
-        public IActionResult GetAllProducts()
+        [HttpGet("GetProductList")]
+        public IActionResult GetProductList()
         {
-            var allCategories = _dbContext.Tbl_ProductCategory.ToList();
-            var products = _dbContext.Tbl_Products.Include(pr => pr.ProductCategory)
-                .Select(pr => new ProductCategoryViewModel
-                {
-                    ProductId = pr.ProductId,
-                    ProductName = pr.ProductName,
-                    ProductImage = pr.ProductImage,
-                    ProCatId = pr.ProCatId,
-                    ProductPrice = pr.ProductPrice,
-                    CategoryName = pr.ProductCategory.CategoryName
-                    
-                }) ;
-
-
+            var products = _product.GetAllProductsCategory();
             return Ok(products);
         }
 
-        [HttpGet("allproductCategories")]
-        public IActionResult GetProductCategories()
+        [HttpGet, Route("GetCategoryList")]
+        public IActionResult GetCategoryList()
         {
-            var productCategories = new List<TblProductCategory>();
-            foreach (var item in _dbContext.Tbl_ProductCategory)
-            {
-                productCategories.Add(new TblProductCategory()
-                {
-                    CategoryName = item.CategoryName,
-                    CategoryId = item.CategoryId
-                });
-            }
+            var products = _category.GetAllCategory();
+            return Ok(products);
+        }
+
+        [HttpGet("CreateProduct")]
+        public IActionResult CreateProduct()
+        {
+            var productCategories = _product.CreateProduct();
 
             return Ok(productCategories);
         }
 
-        [HttpPost("create")]
+        [HttpPost("Create")]
         public async Task<IActionResult> Create(TblProducts products)
         {
 
             if (ModelState.IsValid)
             {
-                _dbContext.Add(products);
-                await _dbContext.SaveChangesAsync();
+
+                await _product.Create(products);
                 return Ok();
             }
             else
@@ -81,7 +71,7 @@ namespace UsersProd.Controllers
 
         }
 
-        [HttpGet] 
+        [HttpGet]
         [Route("EditProduct/{id:int}")]
         public async Task<IActionResult> Edit(int id)
         {
@@ -89,46 +79,16 @@ namespace UsersProd.Controllers
             {
                 return BadRequest();
             }
-            var product = await _dbContext.Tbl_Products.Include(p=>p.ProductCategory).Where(c=>c.ProductId==id).FirstOrDefaultAsync();
-            List<TblProductCategory> categories =  _dbContext.Tbl_ProductCategory.ToList<TblProductCategory>();
-            ProductEditViewModel productEditViewModel = new ProductEditViewModel {
-            Product=product,
-            Category=categories
-            };
-           
 
-            return Ok(productEditViewModel);
+            return Ok(await _product.GetEditProduct(id));
         }
 
         [HttpPut("Edit")]
         public async Task<IActionResult> Edit(TblProducts inputProduct)
         {
 
-            var product = _dbContext.Tbl_Products.FirstOrDefault(x => x.ProductId == inputProduct.ProductId);
-
-            if (ModelState.IsValid)
-            {
-                if (inputProduct.ProductImage==null)
-                {
-                    product.ProductImage = product.ProductImage;
-                }
-                else
-                {
-                    product.ProductImage = inputProduct.ProductImage;
-                }
-                product.ProductName = inputProduct.ProductName;
-                product.ProductPrice = inputProduct.ProductPrice;
-                TblProductCategory category= _dbContext.Tbl_ProductCategory.FirstOrDefault(c => c.CategoryId == inputProduct.ProCatId);
-
-                product.ProductCategory = category;
-                
-              //  _dbContext.Entry(inputProduct).State = EntityState.Modified;
-              // _dbContext.Update(inputProduct);
-                await _dbContext.SaveChangesAsync();
-                return Ok();
-            }
-            else
-                return BadRequest();
+            var product =await _product.PutEditProduct(inputProduct);
+            return Ok();
         }
 
         [HttpGet]
@@ -140,8 +100,7 @@ namespace UsersProd.Controllers
             {
                 return BadRequest();
             }
-            var getusersdetail = await _dbContext.Tbl_Products.Include(p=>p.ProductCategory).FirstOrDefaultAsync(p=>p.ProductId==id);
-            return Ok(getusersdetail);
+            return Ok(await _product.GetProductDetails(id));
         }
 
 
@@ -152,17 +111,15 @@ namespace UsersProd.Controllers
             {
                 return BadRequest();
             }
-            var getdelete = await _dbContext.Tbl_Products.Include(p => p.ProductCategory).FirstOrDefaultAsync(p => p.ProductId == id);
-            return Ok(getdelete);
+
+            return Ok(await _product.GetProductDetails(id));
         }
 
 
         [HttpDelete("Delete/{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var getusersdelete = await _dbContext.Tbl_Products.FindAsync(id);
-            _dbContext.Tbl_Products.Remove(getusersdelete);
-            await _dbContext.SaveChangesAsync();
+            await _product.Delete(id);
             return Ok();
         }
 

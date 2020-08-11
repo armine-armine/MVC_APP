@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ProductCategoryViewModel>
+﻿@model IEnumerable<UsersProducts.ViewModel.ProductViewModel>
 
 @{
     ViewData["Title"] = "Index";
@@ -11,7 +11,7 @@
     </p>*@
 @if (User.IsInRole("Admin"))
 {<p>
-        <a asp-action="Create">Create New</a>
+        <a asp-action="Create" asp-controller="Home">Create New</a>
     </p>
 }
 <table class="table">
@@ -33,7 +33,7 @@
                 @Html.DisplayNameFor(model => model.ProCatId)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.CategoryName)
+                @Html.DisplayNameFor(model => model.ProductCategory.CategoryName)
             </th>
             <th></th>
         </tr>
@@ -59,26 +59,31 @@
                     @Html.DisplayFor(modelItem => item.ProCatId)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.CategoryName)
+                    @Html.DisplayFor(modelItem => item.ProductCategory.CategoryName)
                 </td>
-                
-                    @{ if (User.IsInRole("Approver"))
-                       {
+
+                @{ if (User.IsInRole("Approver"))
+                    {
                         <td>
-                             @Html.ActionLink("Details", "Details", new { id = item.ProductId }, new { @class = " btn btn-success" })
+                            @Html.ActionLink("Details", "Details", new { id = item.ProductId }, new { @class = " btn btn-success" })
                         </td>
 
-                       }
-
-                        else if (User.IsInRole("Admin"))
-                        { <td>
-                            @Html.ActionLink("Edit", "Edit", new { id = item.ProductId }, new { @class = " btn btn-primary " }) |
-                            @Html.ActionLink("Details", "Details", new { id = item.ProductId }, new { @class = " btn btn-success" }) |
-                            @Html.ActionLink("Delete", "Delete", new { id = item.ProductId }, new { @class = " btn btn-danger" })
-                          </td>
-                        }
                     }
+
+                    else if (User.IsInRole("Admin"))
+                    {
+            <td>
+                @*@Html.ActionLink("Edit", "Edit", new { id = item.ProductId }, new { @class = " btn btn-primary " }) |*@
+                <a asp-action="Edit" asp-controller="Home" asp-route-id="@item.ProductId" class="btn btn-primary"> Edit</a>|
+                <a asp-action="Details" asp-controller="Home" asp-route-id="@item.ProductId" class="btn btn-success"> Details</a>|
+                <a asp-action="Delete" asp-controller="Home" asp-route-id="@item.ProductId" class="btn btn-danger"> Delete</a> 
+
+            </td>
+                    }
+                }
             </tr>
-         }
+        }
     </tbody>
+
 </table>
+

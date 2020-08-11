@@ -10,37 +10,39 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Diagnostics;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
-using Shared.Models;
-using Shared.ViewModels;
+using UsersProducts.ViewModel;
 
 namespace UsersProducts.Controllers
 {
+    
     public class ProductController : Controller
     {
-        private readonly db_UsersProductContext _dbContext;
-        private readonly string API_URL = "http://localhost:5003";
-        public ProductController(db_UsersProductContext _dbContext)
-        {
-            this._dbContext = _dbContext;
-        }
+         private readonly string API_URL = "http://localhost:5003";
+        //private readonly  IConfiguration _configuration;
+        //public ProductController(IConfiguration configuration)
+        //{
+        //    _configuration = configuration;
+        //}
 
-
+      
         [Authorize(Roles = "Viewer, Admin, Approver")]
         public async Task<IActionResult> Index()
         {
-            List<ProductCategoryViewModel> productCategoryViewModel = null;
+           // var API_URL = _configuration["Position:Url"];
+            List<ProductViewModel> productCategoryViewModel = null;
 
             using (var httpClient = new HttpClient())
             {
                 httpClient.DefaultRequestHeaders.Accept.Clear();
-                using (HttpResponseMessage response = await httpClient.GetAsync($"{API_URL}/api/Product/allProducts"))
+                using (HttpResponseMessage response = await httpClient.GetAsync($"{API_URL}/api/Product/GetProductList"))
                 {
                     if (response.IsSuccessStatusCode)
                     {
 
                         var result = await response.Content.ReadAsStringAsync();
-                        productCategoryViewModel = JsonConvert.DeserializeObject<List<ProductCategoryViewModel>>(result);
+                        productCategoryViewModel = JsonConvert.DeserializeObject<List<ProductViewModel>>(result);
 
                     }
                 }
@@ -55,17 +57,17 @@ namespace UsersProducts.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create()
         {
-            ProductEditViewModel tblProductCategories = new ProductEditViewModel();
-
+            ProductCategoryEditViewModel tblProductCategories = new ProductCategoryEditViewModel();
+            //var API_URL = _configuration["Position:Url"];
             using (var httpClient = new HttpClient())
             {
                 httpClient.DefaultRequestHeaders.Accept.Clear();
-                using (HttpResponseMessage response = await httpClient.GetAsync($"{API_URL}/api/Product/allproductCategories"))
+                using (HttpResponseMessage response = await httpClient.GetAsync($"{API_URL}/api/Product/CreateProduct"))
                 {
                     if (response.IsSuccessStatusCode)
                     {
                         var result = await response.Content.ReadAsStringAsync();
-                        tblProductCategories.Category = JsonConvert.DeserializeObject<List<TblProductCategory>>(result);
+                        tblProductCategories.Category = JsonConvert.DeserializeObject<List<CategoriesViewModel>>(result);
                     }
                 }
             }
@@ -76,8 +78,9 @@ namespace UsersProducts.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<IActionResult> Create(TblProducts product, IFormFile file)
+        public async Task<IActionResult> Create(ProductViewModel product, IFormFile file)
         {
+           // var API_URL = _configuration["Position:Url"];
             string filename = System.Guid.NewGuid().ToString() + ".jpg";
             var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", filename);
 
@@ -91,7 +94,7 @@ namespace UsersProducts.Controllers
             {
                 httpClient.DefaultRequestHeaders.Accept.Clear();
                 var productJson = JsonConvert.SerializeObject(product);
-                using (HttpResponseMessage response = await httpClient.PostAsync($"{API_URL}/api/Product/create", new StringContent(productJson, Encoding.UTF8, "application/json")))
+                using (HttpResponseMessage response = await httpClient.PostAsync($"{API_URL}/api/Product/Create", new StringContent(productJson, Encoding.UTF8, "application/json")))
                 {
 
                     if (response.IsSuccessStatusCode)
@@ -104,11 +107,16 @@ namespace UsersProducts.Controllers
 
         }
 
-
+        [HttpGet]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id)
         {
-            ProductEditViewModel productEditViewModel = null;
+          //  var API_URL = _configuration["Position:Url"];
+            //ProductViewModel product =new ProductViewModel();
+            //List<CategoriesViewModel> category = new List<CategoriesViewModel>();
+            ProductCategoryEditViewModel viewModel = new ProductCategoryEditViewModel();
+            viewModel.Category = new List<CategoriesViewModel>();
+            viewModel.Product = new ProductViewModel();
             using (var httpClient = new HttpClient())
             {
                 httpClient.DefaultRequestHeaders.Accept.Clear();
@@ -118,21 +126,44 @@ namespace UsersProducts.Controllers
                     {
 
                         var result = await response.Content.ReadAsStringAsync();
-                        productEditViewModel = JsonConvert.DeserializeObject<ProductEditViewModel>(result);
+                       viewModel.Product = JsonConvert.DeserializeObject<ProductViewModel>(result);
 
                     }
                 }
+
+                using (HttpResponseMessage response = await httpClient.GetAsync($"{API_URL}/api/Product/GetCategoryList"))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+
+                        var result = await response.Content.ReadAsStringAsync();
+                        viewModel.Category = JsonConvert.DeserializeObject<List<CategoriesViewModel>>(result);
+
+                    }
+                }
+
+                //foreach (var item in category)
+                //{
+                //    viewModel.Category.Add(new ViewModel.CategoriesViewModel { CategoryId=item.CategoryId,CategoryName=item.CategoryName});
+                //}
+               
+                //viewModel.Product.ProCatId = product.ProCatId;
+                //viewModel.Product.ProductImage = product.ProductImage;
+                //viewModel.Product.ProductPrice = product.ProductPrice;
+                //viewModel.Product.ProductCategory.CategoryName = product.ProductCategory.CategoryName;
+                //viewModel.Product.ProductName = product.ProductName;
+
             }
 
-            return View(productEditViewModel);
+            return View(viewModel);
         }
 
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<IActionResult> Edit(ProductEditViewModel Model, IFormFile file)
+        public async Task<IActionResult> Edit(ProductCategoryEditViewModel Model, IFormFile file)
         {
-
+          //  var API_URL = _configuration["Position:Url"];
 
             if (file != null)
             {
@@ -167,7 +198,8 @@ namespace UsersProducts.Controllers
         [Authorize(Roles = "Admin, Approver")]
         public async Task<IActionResult> Details(int? id)
         {
-            TblProducts product = null;
+           // var API_URL = _configuration["Position:Url"];
+            ProductViewModel product = null;
 
             using (var httpClient = new HttpClient())
             {
@@ -178,7 +210,7 @@ namespace UsersProducts.Controllers
                     {
 
                         var result = await response.Content.ReadAsStringAsync();
-                        product = JsonConvert.DeserializeObject<TblProducts>(result);
+                        product = JsonConvert.DeserializeObject<ProductViewModel>(result);
 
                     }
                 }
@@ -189,8 +221,9 @@ namespace UsersProducts.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
+           // var API_URL = _configuration["Position:Url"];
 
-            TblProducts product = null;
+            ProductViewModel product = null;
 
             using (var httpClient = new HttpClient())
             {
@@ -201,7 +234,7 @@ namespace UsersProducts.Controllers
                     {
 
                         var result = await response.Content.ReadAsStringAsync();
-                        product = JsonConvert.DeserializeObject<TblProducts>(result);
+                        product = JsonConvert.DeserializeObject<ProductViewModel>(result);
 
                     }
                 }
@@ -214,20 +247,14 @@ namespace UsersProducts.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
-           
+           // var API_URL = _configuration["Position:Url"];
+
 
             using (var httpClient = new HttpClient())
             {
                 httpClient.DefaultRequestHeaders.Accept.Clear();
-                using (HttpResponseMessage response = await httpClient.DeleteAsync($"{API_URL}/api/Product/Delete/{id}"))
-                {
-                    if (response.IsSuccessStatusCode)
-                    {
-
-                       
-
-                    }
-                }
+                using (HttpResponseMessage response = await httpClient.DeleteAsync($"{API_URL}/api/Product/Delete/{id}")) { }
+                
             }
             return RedirectToAction("Index");
 

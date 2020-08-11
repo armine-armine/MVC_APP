@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Shared.Models
+namespace UsersProducts.Models
 {
     public  class TblUsers
     {

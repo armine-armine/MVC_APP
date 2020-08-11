@@ -6,7 +6,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Shared.Models;
+using UsersProducts.Models;
+using UsersProducts.ViewModel;
 
 namespace UsersProducts.Controllers
 {

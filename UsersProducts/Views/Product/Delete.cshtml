@@ -1,4 +1,4 @@
-﻿@model TblProducts
+﻿@model ProductViewModel
 
 @{
     ViewData["Title"] = "Delete";
@@ -33,14 +33,14 @@
         </div>
 
 
-        <div class="col-sm-12" style="text-align: center;margin-top: 36px;">
+        <div class="col-sm-10" style="text-align: center;margin-top: 36px;">
         
-            <img src="~/images/@Model.ProductImage" style="height:300px;" />
+            <img src="~/images/@Model.ProductImage" style="height:200px;" />
         </div>
       
        
     </div>
-    <form asp-action="Delete" asp-route-id="@Model.ProductId">
+    <form asp-action="Delete" asp-controller="Home" asp-route-id="@Model.ProductId">
         <input type="hidden" asp-for="ProductId" />
         <input type="submit" value="Delete" class="btn btn-danger" /> |
         <a asp-action="Index">Back to List</a>
